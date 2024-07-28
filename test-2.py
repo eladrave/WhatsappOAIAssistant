@@ -4,6 +4,7 @@ import httpx
 from dotenv import load_dotenv
 import logging
 import asyncio
+import json
 
 # Load environment variables from .env file
 load_dotenv()
@@ -14,12 +15,10 @@ logger = logging.getLogger(__name__)
 
 # Load environment variables
 OPENAI_KEY = os.getenv('OpenAIKey')
-OPENAI_BASE_URL = os.getenv('OpenAIBaseURL')
-OPENAI_MODEL = os.getenv('OpenAIModel')
+OPENAI_ASSISTANT_ID = os.getenv('OpenAIAssistantId')
 
 # Set OpenAI configuration
 openai.api_key = OPENAI_KEY
-openai.api_base = OPENAI_BASE_URL
 
 class Tool:
     def __init__(self, name):
@@ -52,18 +51,38 @@ class ToolManager:
 
 class OpenAIAssistant:
     def __init__(self, tool_manager):
-        self.api_key = OPENAI_KEY
-        self.api_base = OPENAI_BASE_URL
         self.tool_manager = tool_manager
 
     async def get_response(self, prompt):
         try:
-            response = openai.Completion.create(
-                model=OPENAI_MODEL,
-                prompt=prompt,
-                max_tokens=150
+            # Create a new thread
+            thread = await openai.Thread.create()
+            logger.debug(f"Created thread: {thread}")
+
+            # Add a user message to the thread
+            user_message = await openai.Message.create(
+                thread_id=thread.id,
+                role="user",
+                content=prompt
             )
-            return response.choices[0].text.strip()
+            logger.debug(f"Added message to thread: {user_message}")
+
+            # Run the assistant
+            run = await openai.Run.create(
+                thread_id=thread.id,
+                assistant_id=OPENAI_ASSISTANT_ID
+            )
+            logger.debug(f"Started assistant run: {run}")
+
+            # Wait for the run to complete
+            run = await self.wait_on_run(run, thread)
+
+            # Retrieve the assistant's response
+            messages = await openai.Message.list(thread_id=thread.id)
+            assistant_response = messages[-1].content
+            logger.debug(f"Assistant response: {assistant_response}")
+
+            return assistant_response
         except Exception as e:
             logger.error(f"Error getting response from OpenAI: {e}")
             return "Sorry, something went wrong with the assistant."
@@ -75,6 +94,15 @@ class OpenAIAssistant:
         except Exception as e:
             logger.error(f"Error executing tool {tool_name}: {e}")
             return "Sorry, something went wrong with the tool."
+
+    async def wait_on_run(self, run, thread):
+        while run.status in ["queued", "in_progress"]:
+            await asyncio.sleep(1)
+            run = await openai.Run.retrieve(
+                thread_id=thread.id,
+                run_id=run.id
+            )
+        return run
 
 async def sanity_check():
     tool_manager = ToolManager()
