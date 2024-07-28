@@ -12,7 +12,7 @@ load_dotenv()
 openai.api_key = os.getenv('OpenAIKey')
 assistant_id = os.getenv('OpenAIAssistantId')
 
-client = OpenAI(api_key=os.environ.get("OpenAIKey", "<your OpenAI API key if not set as env var>"))
+client = OpenAI(api_key=os.environ["OpenAIKey"])
 
 
 
@@ -21,7 +21,7 @@ thread = client.beta.threads.create()
 message = client.beta.threads.messages.create(
     thread_id=thread.id,
     role="user",
-    content="Can you help me?",
+    content="What is the latest news in Israel?",
 )
 
 
@@ -34,13 +34,32 @@ run = client.beta.threads.runs.create(
 import time
 
 def wait_on_run(run, thread):
-    while run.status == "queued" or run.status == "in_progress":
+    while run.status != "completed":
+        print(run.status)  
         run = client.beta.threads.runs.retrieve(
             thread_id=thread.id,
             run_id=run.id,
         )
-        time.sleep(0.5)
+        
+        if run.required_action:
+            for tool_call in run.required_action.submit_tool_outputs.tool_calls:
+                print("Call ", tool_call.function)
+            
+            run = client.beta.threads.runs.submit_tool_outputs(
+                thread_id=thread.id,
+                run_id=run.id,
+                tool_outputs=[
+                    {
+                        "tool_call_id": tool_call.id,
+                        "output": json.dumps(responses),
+                    }
+                ],
+            )
+
+                
     return run
 
 run = wait_on_run(run, thread)
 print(run)
+
+
