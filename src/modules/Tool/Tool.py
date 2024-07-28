@@ -1,12 +1,8 @@
-
 class Tool:
-    name: str
+    async def execute(self, *args, **kwargs):
+        raise NotImplementedError("Subclasses should implement this method.")
 
-    def execute(self, *args, **kwargs):
-        f"Executing {self.name} tool"
-        pass
-
-
-
-
-
+    def __str__(self) -> str:
+        return "tool name"
+    
+__all__ = ['Tool']
