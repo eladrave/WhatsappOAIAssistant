@@ -91,7 +91,6 @@ async def handle_message(Body: str = Form(), From: str = Form(), To: str = Form(
         logger.error(f"Error handling message: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-
 def send_whatsapp_message(From: str, to: str, body: str):
     print(f"Sending message from {From} to {to}: {body}")
     from_whatsapp_number = f'{From}'
