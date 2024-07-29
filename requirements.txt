@@ -1,7 +1,7 @@
 fastapi
 uvicorn
 pydantic
-openai==0.28
+openai
 httpx
 python-dotenv
 twilio
