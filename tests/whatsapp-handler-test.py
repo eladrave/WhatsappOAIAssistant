@@ -6,7 +6,7 @@ from twilio.rest import Client
 from dotenv import load_dotenv
 import logging
 
-from src.modules.WhatsappHandler.WhatsAppHandler import WhatsAppHandler
+from src.modules.WhatsAppHandler.WhatsAppHandler import WhatsAppHandler
 
 
 # Load environment variables from .env file
