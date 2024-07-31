@@ -10,10 +10,10 @@ COPY requirements.txt .
 
 
 
-ENV DBName=whatsapp
-ENV DBUser=postgres
-ENV DBPassword=TalalZoabi!
-ENV DBHost=34.16.58.205
+# ENV DBName=whatsapp
+# ENV DBUser=postgres
+# ENV DBPassword=TalalZoabi!
+# ENV DBHost=34.16.58.205
 
 # Install the required dependencies
 RUN pip install --no-cache-dir -r requirements.txt
@@ -22,7 +22,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Expose the port that the app will run on
-EXPOSE 8000
+EXPOSE 8080
 
 # Command to run the application
 CMD ["python", "-m", "src.main"]
