@@ -9,10 +9,12 @@ from openai import OpenAI
 
 from ..WhatsAppHandler import WhatsAppHandler
 from ..OpenAIHandler import OpenAIHandler
+from ..DBClient import DBClient
 
 
 class WhatsAppBot:
     def __init__(self):
+        self._load_database_client()
         self._load_environment_variables()
         self._configure_openai()
         self._initialize_clients()
@@ -21,13 +23,20 @@ class WhatsAppBot:
         self._initialize_app()
         self._define_routes()
 
+    def _load_database_client(self):
+        self.db_client = DBClient(os.getenv('DBName'),
+                                  os.getenv('DBUser'),
+                                  os.getenv('DBPassword'),
+                                  os.getenv('DBHost'))
+
     def _load_environment_variables(self):
-        self.OPENAI_KEY = os.getenv('OpenAIKey')
-        self.OPENAI_BASE_URL = os.getenv('OpenAIBaseURL')
-        self.OPENAI_MODEL = os.getenv('OpenAIModel')
-        self.TWILIO_ACCOUNT_SID = os.getenv('TwilioAccountSID')
-        self.TWILIO_AUTH_TOKEN = os.getenv('TwilioAuthToken')
-        self.assistant_id = os.getenv('OpenAIAssistantId')
+        config = self.db_client.read_config()
+        
+        self.OPENAI_KEY = config['OpenAIKey']
+        self.OPENAI_BASE_URL = config['OpenAIBaseURL']
+        self.OPENAI_MODEL = config['OpenAIModel']
+        self.TWILIO_ACCOUNT_SID = config['TwilioAccountSID']
+        self.TWILIO_AUTH_TOKEN = config['TwilioAuthToken']
 
     def _configure_openai(self):
         openai.api_key = self.OPENAI_KEY
@@ -39,7 +48,7 @@ class WhatsAppBot:
 
     def _initialize_handlers(self):
         self.whatsapp_handler = WhatsAppHandler(self.twilio_client)
-        self.openai_handler = OpenAIHandler(self.openai_client, self.assistant_id)
+        self.openai_handler = OpenAIHandler(self.openai_client)
 
     def _setup_logging(self):
         logging.basicConfig(level=logging.DEBUG)
@@ -53,7 +62,12 @@ class WhatsAppBot:
 
     async def handle_message(self, Body: str = Form(), From: str = Form(), To: str = Form()):
         try:
-            res = await self.openai_handler.query(Body)
+            if not self.db_client.check_user_exists(From):
+                return {"success": True}
+
+            assistant_id = self.db_client.get_assistant_id(From)
+            res = await self.openai_handler.query(Body, assistant_id)
+            
             self.whatsapp_handler.send_message(From, To, res[0])
             return {"success": True}
         except Exception as e:
