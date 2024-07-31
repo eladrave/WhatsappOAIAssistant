@@ -7,6 +7,14 @@ WORKDIR /app
 # Copy the requirements.txt file into the container
 COPY requirements.txt .
 
+
+
+
+ENV DBName=whatsapp
+ENV DBUser=postgres
+ENV DBPassword=TalalZoabi!
+ENV DBHost=34.16.58.205
+
 # Install the required dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
