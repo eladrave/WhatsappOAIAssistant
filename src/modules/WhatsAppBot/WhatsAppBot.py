@@ -14,6 +14,7 @@ from ..DBClient import DBClient
 
 class WhatsAppBot:
     def __init__(self):
+        print('start build')
         self._load_database_client()
         self._load_environment_variables()
         self._configure_openai()
@@ -59,6 +60,12 @@ class WhatsAppBot:
 
     def _define_routes(self):
         self.app.post("/handleMessage")(self.handle_message)
+        self.app.get("/")(self.heartbeat)
+
+
+    async def heartbeat(self):
+        return {'success': True}
+
 
     async def handle_message(self, Body: str = Form(), From: str = Form(), To: str = Form()):
         try:
@@ -74,7 +81,7 @@ class WhatsAppBot:
             self.logger.error(f"Error handling message: {e}")
             raise HTTPException(status_code=500, detail=str(e))
 
-    def run(self, host="0.0.0.0", port=8000):
+    def run(self, host="0.0.0.0", port=8080):
         import uvicorn
         uvicorn.run(self.app, host=host, port=port)
 
