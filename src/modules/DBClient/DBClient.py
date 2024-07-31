@@ -8,13 +8,18 @@ class DBClient:
             'dbname': dbname,
             'user': user,
             'password': password,
-            'host': host
+            'host': host,
+            'connect_timeout': 10  # Add a connection timeout
         }
         self.conn = None
 
     def _connect(self):
-        if self.conn is None or self.conn.closed:
-            self.conn = psycopg2.connect(**self.connection_params)
+        try:
+            if self.conn is None or self.conn.closed:
+                self.conn = psycopg2.connect(**self.connection_params)
+        except psycopg2.OperationalError as e:
+            print(f"Error connecting to the database: {e}")
+            self.conn = None
 
     def _disconnect(self):
         if self.conn is not None and not self.conn.closed:
@@ -22,6 +27,8 @@ class DBClient:
 
     def check_user_exists(self, phone_number: str) -> bool:
         self._connect()
+        if self.conn is None:
+            return False
         try:
             with self.conn.cursor() as cur:
                 cur.execute("SELECT 1 FROM users WHERE phone_number = %s", (phone_number,))
@@ -34,6 +41,8 @@ class DBClient:
 
     def get_assistant_id(self, phone_number: str) -> Optional[str]:
         self._connect()
+        if self.conn is None:
+            return None
         try:
             with self.conn.cursor() as cur:
                 cur.execute("SELECT assistant_id FROM users WHERE phone_number = %s", (phone_number,))
@@ -47,6 +56,8 @@ class DBClient:
 
     def add_user(self, phone_number: str, assistant_id: str) -> bool:
         self._connect()
+        if self.conn is None:
+            return False
         try:
             with self.conn.cursor() as cur:
                 cur.execute("INSERT INTO users (phone_number, assistant_id) VALUES (%s, %s)", (phone_number, assistant_id))
@@ -60,6 +71,8 @@ class DBClient:
 
     def update_user(self, phone_number: str, assistant_id: str) -> bool:
         self._connect()
+        if self.conn is None:
+            return False
         try:
             with self.conn.cursor() as cur:
                 cur.execute("UPDATE users SET assistant_id = %s WHERE phone_number = %s", (assistant_id, phone_number))
@@ -73,6 +86,8 @@ class DBClient:
 
     def remove_user(self, phone_number: str) -> bool:
         self._connect()
+        if self.conn is None:
+            return False
         try:
             with self.conn.cursor() as cur:
                 cur.execute("DELETE FROM users WHERE phone_number = %s", (phone_number,))
@@ -86,6 +101,8 @@ class DBClient:
 
     def get_all_users(self) -> List[Dict[str, str]]:
         self._connect()
+        if self.conn is None:
+            return []
         try:
             with self.conn.cursor() as cur:
                 cur.execute("SELECT phone_number, assistant_id FROM users")
@@ -99,6 +116,8 @@ class DBClient:
 
     def read_config(self) -> Dict[str, str]:
         self._connect()
+        if self.conn is None:
+            return {}
         try:
             with self.conn.cursor() as cur:
                 cur.execute("SELECT key, value FROM config")
