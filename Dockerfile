@@ -10,10 +10,11 @@ COPY requirements.txt .
 
 
 
-# ENV DBName=whatsapp
-# ENV DBUser=postgres
-# ENV DBPassword=TalalZoabi!
-# ENV DBHost=34.16.58.205
+ ENV DBName=whatsapp
+ ENV DBUser=kenobi
+ ENV DBPassword=kenobi
+ ENV DBHost= 10.109.128.18
+
 
 # Install the required dependencies
 RUN pip install --no-cache-dir -r requirements.txt
