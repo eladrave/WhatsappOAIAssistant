@@ -14,18 +14,20 @@ from ..Tool.WebSearch import WebSearch
 
 
 class OpenAIHandler:
-    def __init__(self, client, sleep_period=0.5) -> None:
+    def __init__(self, sleep_period=0.5) -> None:
         self.tool_manager = ToolManager()
         self._register_tools()
         self.sleep_period = sleep_period
+        self.client = OpenAI()
 
-        self.client = client
 
     def _register_tools(self):
         """Register all available tools."""
         self.tool_manager.register_tool(WebSearch())
 
-    async def query(self, query: str, assistant_id: str):
+    async def query(self, query: str, assistant_id: str, openai_api_key: str):
+        openai.api_key = openai_api_key
+
         thread = self.client.beta.threads.create()
 
         self.client.beta.threads.messages.create(

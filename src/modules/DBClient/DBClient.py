@@ -39,28 +39,41 @@ class DBClient:
         finally:
             self._disconnect()
 
-    def get_assistant_id(self, phone_number: str) -> Optional[str]:
+    def get_user(self, phone_number: str) -> Optional[Dict[str, str]]:
+        """
+        Retrieve the user's information based on the phone number.
+        
+        :param phone_number: The phone number to search for.
+        :return: A dictionary containing the user's information or None if not found.
+        """
         self._connect()
         if self.conn is None:
             return None
         try:
             with self.conn.cursor() as cur:
-                cur.execute("SELECT assistant_id FROM users WHERE phone_number = %s", (phone_number,))
+                cur.execute("SELECT phone_number, assistant_id, openai_api_key FROM users WHERE phone_number = %s", (phone_number,))
                 result = cur.fetchone()
-                return result[0] if result else None
+                if result:
+                    return {
+                        "phone_number": result[0],
+                        "assistant_id": result[1],
+                        "openai_api_key": result[2]
+                    }
+                return None
         except Exception as e:
-            print(f"Error getting assistant ID: {e}")
+            print(f"Error getting user: {e}")
             return None
         finally:
             self._disconnect()
 
-    def add_user(self, phone_number: str, assistant_id: str) -> bool:
+    def add_user(self, phone_number: str, assistant_id: str, openai_api_key: str) -> bool:
         self._connect()
         if self.conn is None:
             return False
         try:
             with self.conn.cursor() as cur:
-                cur.execute("INSERT INTO users (phone_number, assistant_id) VALUES (%s, %s)", (phone_number, assistant_id))
+                cur.execute("INSERT INTO users (phone_number, assistant_id, openai_api_key) VALUES (%s, %s, %s)", 
+                            (phone_number, assistant_id, openai_api_key))
                 self.conn.commit()
                 return True
         except Exception as e:
@@ -69,13 +82,14 @@ class DBClient:
         finally:
             self._disconnect()
 
-    def update_user(self, phone_number: str, assistant_id: str) -> bool:
+    def update_user(self, phone_number: str, assistant_id: str, openai_api_key: str) -> bool:
         self._connect()
         if self.conn is None:
             return False
         try:
             with self.conn.cursor() as cur:
-                cur.execute("UPDATE users SET assistant_id = %s WHERE phone_number = %s", (assistant_id, phone_number))
+                cur.execute("UPDATE users SET assistant_id = %s, openai_api_key = %s WHERE phone_number = %s", 
+                            (assistant_id, openai_api_key, phone_number))
                 self.conn.commit()
                 return True
         except Exception as e:
@@ -105,8 +119,8 @@ class DBClient:
             return []
         try:
             with self.conn.cursor() as cur:
-                cur.execute("SELECT phone_number, assistant_id FROM users")
-                users = [{"phone_number": row[0], "assistant_id": row[1]} for row in cur.fetchall()]
+                cur.execute("SELECT phone_number, assistant_id, openai_api_key FROM users")
+                users = [{"phone_number": row[0], "assistant_id": row[1], "openai_api_key": row[2]} for row in cur.fetchall()]
                 return users
         except Exception as e:
             print(f"Error getting all users: {e}")
