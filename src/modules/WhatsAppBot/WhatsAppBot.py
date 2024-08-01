@@ -63,6 +63,7 @@ class WhatsAppBot:
         self.app.get("/")(self.heartbeat)
 
 
+    # For cloud
     async def heartbeat(self):
         return {'success': True}
 
