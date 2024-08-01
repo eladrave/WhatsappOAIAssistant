@@ -18,7 +18,7 @@ class OpenAIHandler:
         self.tool_manager = ToolManager()
         self._register_tools()
         self.sleep_period = sleep_period
-        self.client = OpenAI()
+        self.client = None
 
 
     def _register_tools(self):
@@ -27,6 +27,7 @@ class OpenAIHandler:
 
     async def query(self, query: str, assistant_id: str, openai_api_key: str):
         openai.api_key = openai_api_key
+        self.client = OpenAI(api_key=openai_api_key)
 
         thread = self.client.beta.threads.create()
 

@@ -14,7 +14,6 @@ from ..DBClient import DBClient
 
 class WhatsAppBot:
     def __init__(self):
-        print('start build')
         self._load_database_client()
         self._load_environment_variables()
         self._initialize_clients()
@@ -27,11 +26,11 @@ class WhatsAppBot:
         self.db_client = DBClient(os.getenv('DBName'),
                                   os.getenv('DBUser'),
                                   os.getenv('DBPassword'),
-                                  os.getenv('DBHost'))
+                                  os.getenv('DBHost'), os.getenv('DBPort', '5432'))
 
     def _load_environment_variables(self):
         config = self.db_client.read_config()
-        
+
         self.OPENAI_BASE_URL = config['OpenAIBaseURL']
         self.OPENAI_MODEL = config['OpenAIModel']
         self.TWILIO_ACCOUNT_SID = config['TwilioAccountSID']
