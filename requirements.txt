@@ -6,4 +6,3 @@ httpx
 python-dotenv
 twilio
 psycopg2-binary
-cloud-sql-python-connector
