@@ -15,6 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # ENV DBUser=postgres
 # ENV DBPassword=TalalZoabi!
 # ENV DBHost=localhost
+# ENV DBPort=5434
 
 
 # Copy the rest of the application code into the container

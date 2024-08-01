@@ -72,7 +72,7 @@ class WhatsAppBot:
                 return {"success": True}
 
             user = self.db_client.get_user(From)
-            res = await self.openai_handler.query(Body, user['assistant_id'])
+            res = await self.openai_handler.query(Body, user['assistant_id'], user['openai_api_key'])
             
             self.whatsapp_handler.send_message(From, To, res[0])
             return {"success": True}
