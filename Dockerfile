@@ -10,10 +10,10 @@ COPY requirements.txt .
 
 
 
- ENV DBName=whatsapp
- ENV DBUser=kenobi
- ENV DBPassword=kenobi
- ENV DBHost= 10.109.128.18
+# ENV DBName=whatsapp
+# ENV DBUser=kenobi
+# ENV DBPassword=kenobi
+# ENV DBHost= 10.109.128.18
 
 
 # Install the required dependencies
