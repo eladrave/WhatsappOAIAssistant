@@ -83,7 +83,6 @@ class WhatsAppBot:
                 return {"success": True}
 
 
-
             user = self.db_client.get_user(From) # Get user by phone number
             
             NumMedia = form_data.get('NumMedia')
