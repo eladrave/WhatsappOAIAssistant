@@ -10,14 +10,6 @@ COPY requirements.txt .
 # Install the required dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Set environment variables for connecting to PostgreSQL
-# ENV DBName=postgres
-# ENV DBUser=postgres
-# ENV DBPassword=TalalZoabi!
-# ENV DBHost=localhost
-# ENV DBPort=5434
-
-
 # Copy the rest of the application code into the container
 COPY . .
 

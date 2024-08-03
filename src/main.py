@@ -1,3 +1,4 @@
+import os
 from dotenv import load_dotenv
 
 from .modules.WhatsAppBot import WhatsAppBot
@@ -8,5 +9,5 @@ load_dotenv()
 
 if __name__ == '__main__':
     bot = WhatsAppBot()
-    bot.run(port=8000)
+    bot.run(port=os.getenv('PORT', 8080))
 
