@@ -1,4 +1,13 @@
 /ignore
 .env
 
+
+# Ignore everything in the temp directory
+temp/*
+
+# Do not ignore the temp directory itself
+!temp/
+
+
+
 __pycache__/
