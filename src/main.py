@@ -8,5 +8,5 @@ load_dotenv()
 
 if __name__ == '__main__':
     bot = WhatsAppBot()
-    bot.run()
+    bot.run(port=8000)
 

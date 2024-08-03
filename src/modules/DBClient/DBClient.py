@@ -4,7 +4,6 @@ from typing import Optional, Dict, List
 
 class DBClient:
     def __init__(self, dbname: str, user: str, password: str, host: str = 'localhost', port='5432'):
-        print(dbname, user, password, host)
         self.connection_params = {
             'dbname': dbname,
             'user': user,
