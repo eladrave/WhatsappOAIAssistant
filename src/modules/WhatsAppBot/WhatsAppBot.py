@@ -1,7 +1,6 @@
 from fastapi import FastAPI, Form, HTTPException, Request, status
 import logging
 import os
-from twilio.rest import Client
 import openai
 
 from ..WhatsAppHandler import WhatsAppHandler
@@ -12,52 +11,14 @@ from ..AudioTranscriber import AudioTranscriber
 
 
 class WhatsAppBot:
-    def __init__(self):
-        self._load_database_client()
-        self._load_environment_variables()
-        self._initialize_clients()
-        self._initialize_handlers()
-        self._setup_logging()
-        self._initialize_app()
-        self._define_routes()
+    def __init__(self, db_client, whatsapp_handler, openai_handler, audio_transcriber, logger):
+        self.db_client = db_client
+        self.whatsapp_handler = whatsapp_handler
+        self.openai_handler = openai_handler
+        self.audio_transcriber = audio_transcriber
+        self.logger = logger
 
-    def _load_database_client(self):
-        self.db_client = DBClient(
-            os.getenv('DBName'),
-            os.getenv('DBUser'),
-            os.getenv('DBPassword'),
-            os.getenv('DBHost'),
-            os.getenv('DBPort', '5432')
-        )
 
-    def _load_environment_variables(self):
-        config = self.db_client.read_config()
-
-        self.OPENAI_BASE_URL = config['OpenAIBaseURL']
-        self.OPENAI_MODEL = config['OpenAIModel']
-        self.TWILIO_ACCOUNT_SID = config['TwilioAccountSID']
-        self.TWILIO_AUTH_TOKEN = config['TwilioAuthToken']
-
-    def _initialize_clients(self):
-        self.twilio_client = Client(self.TWILIO_ACCOUNT_SID, self.TWILIO_AUTH_TOKEN)
-
-    def _initialize_handlers(self):
-        openai.api_base = self.OPENAI_BASE_URL
-
-        self.whatsapp_handler = WhatsAppHandler(self.twilio_client)
-        self.openai_handler = OpenAIHandler()
-        self.audio_transcriber = AudioTranscriber()
-
-    def _setup_logging(self):
-        logging.basicConfig(level=logging.DEBUG)
-        self.logger = logging.getLogger(__name__)
-
-    def _initialize_app(self):
-        self.app = FastAPI()
-
-    def _define_routes(self):
-        self.app.post("/handleMessage")(self.handle_message)
-        self.app.get("/")(self.heartbeat)
 
     # For cloud
     async def heartbeat(self):
@@ -110,9 +71,7 @@ class WhatsAppBot:
             self.logger.error(f"Error handling message: {e}")
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-    def run(self, host="0.0.0.0", port=8080):
-        import uvicorn
-        uvicorn.run(self.app, host=host, port=port)
+    
 
 
 __all__ = ['WhatsAppBot']
