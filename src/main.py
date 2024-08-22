@@ -3,10 +3,9 @@ from dotenv import load_dotenv
 import openai
 import logging
 import uvicorn
-from fastapi import FastAPI, Form, HTTPException, Request, status
+from fastapi import FastAPI,  Request
 from twilio.rest import Client as TwilioClient
 
-from mem0 import Memory
 
 
 from .modules.WhatsAppBot import WhatsAppBot
