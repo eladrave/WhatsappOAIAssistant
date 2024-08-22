@@ -8,7 +8,7 @@ class SaveMemory(Tool):
         super().__init__(*args, **kwargs)
         
 
-    async def execute(self, query: str, session: Session) -> str:
+    async def execute(self, query: str, session: Session, **kwargs) -> str:
         session.memory_client.add(query, user_id=session.user_id)
         return "Memory saved successfully."
 
