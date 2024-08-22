@@ -2,6 +2,8 @@ from openai import OpenAI
 import logging
 import requests
 
+from ..Session import Session
+
 class AudioTranscriber:
     def __init__(self, model: str = "whisper-1"):
         """
@@ -12,7 +14,7 @@ class AudioTranscriber:
         self.model = model
         self.logger = logging.getLogger(__name__)
 
-    def transcribe_audio(self, api_key: str, file_path: str) -> str:
+    def transcribe_audio(self, session: Session, file_path: str) -> str:
         """
         Transcribe the given audio file to text using OpenAI's Whisper API.
         
@@ -22,7 +24,7 @@ class AudioTranscriber:
         """
         try:
             # Initialize the OpenAI client with the provided API key
-            client = OpenAI(api_key=api_key)
+            client = session.openai_client
 
             # Load the audio file
             audio_file = self._load_audio_file(file_path)

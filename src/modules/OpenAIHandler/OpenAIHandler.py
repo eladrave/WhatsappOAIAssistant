@@ -1,65 +1,55 @@
-import openai
 import os
 import time
 import json
-from dotenv import load_dotenv
 from openai import OpenAI
-import asyncio
-
 
 from ..ToolManager.ToolManager import ToolManager
-from ..Tool.WebSearch import WebSearch
 
-
+from ..Session import Session
 
 
 class OpenAIHandler:
-    def __init__(self, sleep_period=0.5) -> None:
-        self.tool_manager = ToolManager()
-        self._register_tools()
+    def __init__(self, tool_manager: ToolManager, sleep_period=0.5) -> None:
+        self.tool_manager = tool_manager
         self.sleep_period = sleep_period
         self.client = None
 
 
-    def _register_tools(self):
-        """Register all available tools."""
-        self.tool_manager.register_tool(WebSearch())
+    async def query(self, query: str, session: Session, **kwargs):
+        openai_client = session.openai_client
+        assistant_id = session.assistant_id
 
-    async def query(self, query: str, assistant_id: str, openai_api_key: str):
-        openai.api_key = openai_api_key
-        self.client = OpenAI(api_key=openai_api_key)
+        thread = openai_client.beta.threads.create()
 
-        thread = self.client.beta.threads.create()
-
-        self.client.beta.threads.messages.create(
+        openai_client.beta.threads.messages.create(
             thread_id=thread.id,
             role="user",
             content=query,
         )
 
-        run = self.client.beta.threads.runs.create(
+        run = openai_client.beta.threads.runs.create(
             thread_id=thread.id,
             assistant_id=assistant_id,
         )
 
-        run = await self._wait_on_run(thread, run)
+        run = await self._wait_on_run(thread, run, openai_client, session)
 
-        messages = self.client.beta.threads.messages.list(thread_id=thread.id)
+        messages = openai_client.beta.threads.messages.list(thread_id=thread.id)
         return [msg.content[0].text.value for msg in messages.data]
 
-    async def _wait_on_run(self, thread, run):
+    async def _wait_on_run(self, thread, run, openai_client: OpenAI, session: Session):
         while run.status != "completed":
             print(run.status)  
-            run = self.client.beta.threads.runs.retrieve(
+            run = openai_client.beta.threads.runs.retrieve(
                 thread_id=thread.id,
                 run_id=run.id,
             )
             
             if run.required_action:
-                tool_call_reqs = await self._handle_tool_calls(run)
+                tool_call_reqs = await self._handle_tool_calls(run, session=session)
 
                 # Submit the tool output
-                run = self.client.beta.threads.runs.submit_tool_outputs(
+                run = openai_client.beta.threads.runs.submit_tool_outputs(
                     thread_id=thread.id,
                     run_id=run.id,
                     tool_outputs=tool_call_reqs,
@@ -69,14 +59,14 @@ class OpenAIHandler:
         
         return run
 
-    async def _handle_tool_calls(self, run):
+    async def _handle_tool_calls(self, run, **kwargs):
         tool_call_reqs = []
         for tool_call in run.required_action.submit_tool_outputs.tool_calls:
             print("Call ", tool_call.function)
 
             # Execute the tool
             tool_params = json.loads(tool_call.function.arguments)
-            tool_result = await self.tool_manager.use_tool(tool_call.function.name, **tool_params)
+            tool_result = await self.tool_manager.use_tool(tool_call.function.name, **tool_params, **kwargs)
 
             tool_call_dict = {
                 "tool_call_id": tool_call.id,

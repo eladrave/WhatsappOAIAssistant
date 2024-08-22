@@ -6,7 +6,7 @@ class WebSearch(Tool):
     def __init__(self, timeout: float = 10.0):
         self.timeout = timeout
 
-    async def execute(self, query: str) -> str:
+    async def execute(self, query: str, **kwargs) -> str:
         url = f"https://eladsearngx-w4o7wofqcq-nn.a.run.app/search?format=json&q={query}"
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             try:
