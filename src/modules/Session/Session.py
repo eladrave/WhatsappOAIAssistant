@@ -13,7 +13,7 @@ class Session:
         self.memory_client = memory_client
 
     def __del__(self):
-        self.memory_client.delete_all(session_id=self.session_id, user_id=self.user_id)
+        self.memory_client.delete_all(run_id=self.session_id)
         
 
     

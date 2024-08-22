@@ -77,14 +77,14 @@ class WhatsAppBot:
             if Body is None or Body == "":
                 return {"success": True}
             
-            conv = session.memory_client.get_all(session_id=session.session_id, user_id=user.phone_number)
+            conv = session.memory_client.get_all(run_id=session.session_id, user_id=user.phone_number)
 
             prompt = f"{conv}\nUser: {Body}\nAssistant:"
 
 
             res = await self.openai_handler.query(prompt, session)
 
-            session.memory_client.add(prompt+res[0], session_id=session.session_id, user_id=user.phone_number)
+            session.memory_client.add(prompt+res[0], run_id=session.session_id, user_id=user.phone_number)
 
             self.whatsapp_handler.send_message(From, To, res[0])
             return {"success": True}
