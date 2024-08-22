@@ -8,3 +8,4 @@ twilio
 psycopg2-binary
 python-multipart
 
+mem0ai
