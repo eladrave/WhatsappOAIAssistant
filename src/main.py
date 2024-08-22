@@ -84,7 +84,7 @@ if __name__ == '__main__':
     app = FastAPI()
 
     # add bot heartbeat route to FastAPI
-    @app.get("/heartbeat")
+    @app.get("/")
     async def heartbeat():
         return await bot.heartbeat()
 
