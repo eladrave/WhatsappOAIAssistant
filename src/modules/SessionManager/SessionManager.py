@@ -27,15 +27,15 @@ class SessionManager:
         self.sessions[session.user_id] = session_obj
 
 
-    def delete_session(self, session_id: str):
+    def delete_session(self, user_id: str):
         """
         Delete a session for a user.
         """
 
-        logger.info(f"Deleting session: {session_id}")
+        logger.info(f"Deleting session: {user_id}")
 
-        if session_id in self.sessions:
-            del self.sessions[session_id]
+        if user_id in self.sessions:
+            del self.sessions[user_id]
 
     def is_session_active(self, user_id: str):
         """
