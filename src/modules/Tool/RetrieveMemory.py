@@ -13,5 +13,5 @@ class RetrieveMemory(Tool):
         return memory
 
     def __str__(self) -> str:
-        return "retrive_memory"
+        return "retrieve_memory"
 

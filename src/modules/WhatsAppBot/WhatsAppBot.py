@@ -39,13 +39,23 @@ class WhatsAppBot:
         try:
             From, To, Body, form_data = await self.whatsapp_handler.process_request(request)
 
+            self.logger.info(f"From: {From}, To: {To}, Body: {Body}, form_data: {form_data}")
+
             # Is the user is not registered, we should not respond
             if not self.db_client.check_user_exists(From):
                 return {"success": True}
 
-            user = self.db_client.get_user(From) # Get user by phone number
             
+            user = self.db_client.get_user(From) # Get user by phone number
+
+            if Body == '/reset':
+                logging.info(f"Resetting session for user: {user}")
+                self.session_manager.delete_session(user.phone_number)
+                return {"success": True}
+
             logging.info(f"User: {user}")
+
+            self.session_manager.update_sessions()
 
             if not self.session_manager.is_session_active(user.phone_number):
                 session = self.session_factory.create_standard_session(user)
@@ -68,10 +78,9 @@ class WhatsAppBot:
 
             self.session_manager.refresh_session(user.phone_number)
 
-            outdated_sessions = self.session_manager.update_sessions()
-            for session_id in outdated_sessions:
-                self.session_manager.delete_session(session_id)
+            
 
+            self.logger.info(f"Session: {session}")
 
             # Empty message, we shoudl check for media
             if Body is None or Body == "":
