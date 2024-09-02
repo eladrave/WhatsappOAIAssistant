@@ -36,6 +36,7 @@ class WhatsAppBot:
         return {'success': True}
 
     async def handle_message(self, request: Request):
+        From, To = None, None
         try:
             From, To, Body, form_data = await self.whatsapp_handler.process_request(request)
 
@@ -95,11 +96,18 @@ class WhatsAppBot:
 
             session.memory_client.add(prompt+res[0], run_id=session.session_id, user_id=user.phone_number)
 
-            self.whatsapp_handler.send_message(From, To, res[0])
+            # split string into listof stringes every 1500 characters
+            texts = [res[0][i:i+1500] for i in range(0, len(res[0]), 1500)]
+
+            for text in texts:
+                self.whatsapp_handler.send_message(From, To, text)
+
             return {"success": True}
 
         except Exception as e:
             self.logger.error(f"Error handling message: {e}")
+            if From:
+                self.whatsapp_handler.send_message(From, To, str(e))
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
     
