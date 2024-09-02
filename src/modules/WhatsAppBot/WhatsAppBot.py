@@ -36,6 +36,7 @@ class WhatsAppBot:
         return {'success': True}
 
     async def handle_message(self, request: Request):
+        From, To = None, None
         try:
             From, To, Body, form_data = await self.whatsapp_handler.process_request(request)
 
@@ -100,6 +101,8 @@ class WhatsAppBot:
 
         except Exception as e:
             self.logger.error(f"Error handling message: {e}")
+            if From:
+                self.whatsapp_handler.send_message(From, To, str(e))
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
     
