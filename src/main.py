@@ -22,6 +22,9 @@ from .modules.Tool.RetrieveMemory import RetrieveMemory
 from .modules.Tool.SaveMemory import SaveMemory
 from .modules.Tool.WebSearch import WebSearch
 
+from .modules.Command.CommandHandler import CommandHandler
+from .modules.Command.Command import Command
+from .modules.Command.CommandFactory import CommandFactory
 
 
 
@@ -31,6 +34,16 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 # Load environment variables from .env file
 load_dotenv()
 
+
+def initialize_commands():
+    def reset(bot, user):
+        logging.info(f"Resetting session for user: {user}")
+        bot.session_manager.delete_session(user.phone_number)
+    
+    command_handler = CommandHandler({})
+    command_handler.register_command(CommandFactory.create_command('/reset', reset))
+
+    return command_handler
 
 def initialize_bot():
     db_client = DBClient(
@@ -64,6 +77,8 @@ def initialize_bot():
     session_manager = SessionManager()
     session_factory = SessionFactory(SessionBuilder())
 
+    command_handler = initialize_commands()
+
     logger = logging.getLogger(__name__)
 
     bot = WhatsAppBot(db_client, 
@@ -72,6 +87,7 @@ def initialize_bot():
                       audio_transcriber, 
                       session_manager, 
                       session_factory, 
+                      command_handler,
                       logger)
     return bot
 
