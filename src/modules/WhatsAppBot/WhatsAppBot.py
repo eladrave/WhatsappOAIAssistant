@@ -52,10 +52,6 @@ class WhatsAppBot:
             
             user = self.db_client.get_user(From) # Get user by phone number
 
-            command = self.command_handler.extract_command(Body)
-            if command:
-                self.command_handler.execute_command(command, self, user)
-                return {"success": True}
 
             # if Body == '/reset':
             #     logging.info(f"Resetting session for user: {user}")
@@ -94,6 +90,13 @@ class WhatsAppBot:
             # Empty message, we shoudl check for media
             if Body is None or Body == "":
                 return {"success": True}
+            
+
+            command = self.command_handler.extract_command(Body)
+            if command:
+                self.command_handler.execute_command(command, self, user)
+                return {"success": True}
+
             
             conv = session.memory_client.get_all(run_id=session.session_id, user_id=user.phone_number)
 
