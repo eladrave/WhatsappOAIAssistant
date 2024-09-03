@@ -10,6 +10,7 @@ from ..DBClient import DBClient
 from ..OpenAIHandler import OpenAIHandler
 from ..AudioTranscriber import AudioTranscriber
 
+from ..Command.CommandHandler import CommandHandler
 
 class WhatsAppBot:
     def __init__(self,
@@ -19,6 +20,7 @@ class WhatsAppBot:
                   audio_transcriber: AudioTranscriber, 
                   session_manager: SessionManager, 
                   session_factory: SessionFactory,
+                  command_handler: CommandHandler,
                   logger):
         self.db_client = db_client
         self.whatsapp_handler = whatsapp_handler
@@ -26,6 +28,7 @@ class WhatsAppBot:
         self.audio_transcriber = audio_transcriber
         self.session_manager = session_manager
         self.session_factory = session_factory
+        self.command_handler = command_handler
         self.logger = logger
 
 
@@ -49,10 +52,15 @@ class WhatsAppBot:
             
             user = self.db_client.get_user(From) # Get user by phone number
 
-            if Body == '/reset':
-                logging.info(f"Resetting session for user: {user}")
-                self.session_manager.delete_session(user.phone_number)
+            command = self.command_handler.extract_command(Body)
+            if command:
+                self.command_handler.execute_command(command, self, user)
                 return {"success": True}
+
+            # if Body == '/reset':
+            #     logging.info(f"Resetting session for user: {user}")
+            #     self.session_manager.delete_session(user.phone_number)
+            #     return {"success": True}
 
             logging.info(f"User: {user}")
 
