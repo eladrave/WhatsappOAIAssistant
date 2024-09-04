@@ -9,7 +9,7 @@ class SaveMemory(Tool):
         
 
     async def execute(self, query: str, session: Session, **kwargs) -> str:
-        session.memory_client.add(query, user_id=session.user_id)
+        session.memory_client.add(query, user_id=session.user_id, metadata=['Long Term'])
         return "Memory saved successfully."
 
     def __str__(self) -> str:
