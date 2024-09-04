@@ -99,7 +99,8 @@ class WhatsAppBot:
 
             res = await self.openai_handler.query(prompt, session)
 
-            session.memory_client.add(prompt+res[0], run_id=session.session_id, user_id=user.phone_number, metadata=['Short Term'])
+            formatted_user_id = user.phone_number.replace("whatsapp:+", "")
+            session.memory_client.add(prompt+res[0], run_id=session.session_id, user_id=formatted_user_id, metadata=['Short Term'])
 
             self.whatsapp_handler.send_message(From, To, res[0])
 
