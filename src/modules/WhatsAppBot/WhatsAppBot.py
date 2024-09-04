@@ -52,9 +52,13 @@ class WhatsAppBot:
             
             user = self.db_client.get_user(From) # Get user by phone number
 
+            # Format the phone number
+            user.phone_number = user.phone_number.replace("whatsapp:+", "")
+
             logging.info(f"User: {user}")
 
             self.session_manager.update_sessions()
+            
 
             if not self.session_manager.is_session_active(user.phone_number):
                 session = self.session_factory.create_standard_session(user)
@@ -99,8 +103,7 @@ class WhatsAppBot:
 
             res = await self.openai_handler.query(prompt, session)
 
-            formatted_user_id = user.phone_number.replace("whatsapp:+", "")
-            session.memory_client.add(prompt+res[0], run_id=session.session_id, user_id=formatted_user_id, metadata=['Short Term'])
+            session.memory_client.add(prompt+res[0], run_id=session.session_id, user_id=user.phone_number, metadata=['Short Term'])
 
             self.whatsapp_handler.send_message(From, To, res[0])
 
