@@ -105,6 +105,7 @@ class WhatsAppBot:
 
             session.memory_client.add(prompt+res[0], run_id=session.session_id, user_id=user.phone_number, metadata=['Short Term'])
 
+
             self.whatsapp_handler.send_message(From, To, res[0])
 
             return {"success": True}

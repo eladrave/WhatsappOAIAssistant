@@ -9,8 +9,7 @@ class SaveMemory(Tool):
         
 
     async def execute(self, query: str, session: Session, **kwargs) -> str:
-        formatted_user_id = session.user_id.replace("whatsapp:+", "")
-        session.memory_client.add(query, user_id=formatted_user_id, metadata=['Long Term'])
+        session.memory_client.add(query, user_id=session.user_id)
         return "Memory saved successfully."
 
     def __str__(self) -> str:
