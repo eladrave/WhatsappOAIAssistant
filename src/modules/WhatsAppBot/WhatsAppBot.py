@@ -107,11 +107,7 @@ class WhatsAppBot:
 
             session.memory_client.add(prompt+res[0], run_id=session.session_id, user_id=user.phone_number)
 
-            # split string into listof stringes every 1500 characters
-            texts = [res[0][i:i+1500] for i in range(0, len(res[0]), 1500)]
-
-            for text in texts:
-                self.whatsapp_handler.send_message(From, To, text)
+            self.whatsapp_handler.send_message(From, To, res[0])
 
             return {"success": True}
 
