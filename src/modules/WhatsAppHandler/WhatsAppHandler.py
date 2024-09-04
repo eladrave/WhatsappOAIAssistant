@@ -29,12 +29,17 @@ class WhatsAppHandler:
 
     def send_message(self, to, from_, body):
         try:
-            message = self.client.messages.create(
-                body=body,
-                from_=from_,  # Twilio's sandbox number for WhatsApp
-                to=to
-            )
-            return message.sid
+            texts = [body[i:i+1500] for i in range(0, len(body), 1500)]
+            messages_ids = []
+
+            for text in texts:
+                message = self.client.messages.create(
+                    body=text,
+                    from_=from_,  # Twilio's sandbox number for WhatsApp
+                    to=to
+                )
+                messages_ids.append(message.sid)
+            return messages_ids
         except Exception as e:
             logging.getLogger().error(f"Error sending WhatsApp message: {e}")
             return None

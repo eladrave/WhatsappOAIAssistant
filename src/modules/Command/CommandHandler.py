@@ -15,7 +15,8 @@ class CommandHandler:
         else:
             raise Exception(f"Command {command_name} not found")
 
-    def extract_command(self, message: str) -> str | None:
+    # method return str or None if no command is found
+    def extract_command(self, message: str) -> str:
         for command in self.commands:
             if message.startswith(command):
                 return command
