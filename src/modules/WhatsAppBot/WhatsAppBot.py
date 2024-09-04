@@ -52,12 +52,6 @@ class WhatsAppBot:
             
             user = self.db_client.get_user(From) # Get user by phone number
 
-
-            # if Body == '/reset':
-            #     logging.info(f"Resetting session for user: {user}")
-            #     self.session_manager.delete_session(user.phone_number)
-            #     return {"success": True}
-
             logging.info(f"User: {user}")
 
             self.session_manager.update_sessions()
@@ -105,7 +99,7 @@ class WhatsAppBot:
 
             res = await self.openai_handler.query(prompt, session)
 
-            session.memory_client.add(prompt+res[0], run_id=session.session_id, user_id=user.phone_number)
+            session.memory_client.add(prompt+res[0], run_id=session.session_id, user_id=user.phone_number, metadata=['Short Term'])
 
             self.whatsapp_handler.send_message(From, To, res[0])
 
