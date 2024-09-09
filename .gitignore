@@ -8,6 +8,7 @@ temp/*
 # Do not ignore the temp directory itself
 !temp/
 
+cloud_sql_proxy
 
 
 __pycache__/
