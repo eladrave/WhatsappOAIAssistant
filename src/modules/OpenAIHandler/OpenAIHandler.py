@@ -3,7 +3,7 @@ import time
 import json
 from openai import OpenAI
 
-from ..ToolManager.ToolManager import ToolManager
+from ..Tool.ToolManager import ToolManager
 
 from ..Session import Session
 

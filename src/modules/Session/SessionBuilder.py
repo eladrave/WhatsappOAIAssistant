@@ -1,4 +1,4 @@
-from ..Session import Session
+from .Session import Session
 from openai import OpenAI
 
 from mem0 import MemoryClient

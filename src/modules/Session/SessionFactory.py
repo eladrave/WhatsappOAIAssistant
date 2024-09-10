@@ -1,7 +1,7 @@
 import time
 
-from ..SessionBuilder import SessionBuilder
-from ..Session import Session
+from .SessionBuilder import SessionBuilder
+from . import Session
 from ..User import User
 
 from openai import OpenAI

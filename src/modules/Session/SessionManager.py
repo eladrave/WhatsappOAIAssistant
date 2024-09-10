@@ -1,5 +1,5 @@
 import time
-from ..Session import Session
+from .Session import Session
 
 import logging
 

@@ -3,14 +3,17 @@ import logging
 import os
 
 
-from ..SessionFactory import SessionFactory
-from ..SessionManager import SessionManager
+from ..Session import SessionFactory
+from ..Session import SessionManager
 from ..WhatsAppHandler import WhatsAppHandler
 from ..DBClient import DBClient
 from ..OpenAIHandler import OpenAIHandler
 from ..AudioTranscriber import AudioTranscriber
 
 from ..Command.CommandHandler import CommandHandler
+
+from .BotRequest import BotRequest
+
 
 class WhatsAppBot:
     def __init__(self,
@@ -38,19 +41,18 @@ class WhatsAppBot:
         self.session_manager.update_sessions()
         return {'success': True}
 
-    async def handle_message(self, request: Request):
-        From, To = None, None
+    async def handle_message(self, request: BotRequest):
+        user_phone = request.phone_number
+        prompt = request.prompt
         try:
-            From, To, Body, form_data = await self.whatsapp_handler.process_request(request)
 
-            self.logger.info(f"From: {From}, To: {To}, Body: {Body}, form_data: {form_data}")
 
             # Is the user is not registered, we should not respond
-            if not self.db_client.check_user_exists(From):
+            if not self.db_client.check_user_exists(user_phone):
                 return {"success": True}
 
             
-            user = self.db_client.get_user(From) # Get user by phone number
+            user = self.db_client.get_user(user_phone) # Get user by phone number
 
             # Format the phone number
             user.phone_number = user.phone_number.replace("whatsapp:+", "")
@@ -68,15 +70,15 @@ class WhatsAppBot:
                 
 
 
-            NumMedia = form_data.get('NumMedia')
-            for i in range(int(NumMedia)):
-                media_url = form_data.get(f'MediaUrl{i}')
-                media_content_type = form_data.get(f'MediaContentType{i}')
+            # NumMedia = form_data.get('NumMedia')
+            # for i in range(int(NumMedia)):
+            #     media_url = form_data.get(f'MediaUrl{i}')
+            #     media_content_type = form_data.get(f'MediaContentType{i}')
                 
-                if media_content_type.startswith('audio/ogg'):
-                    self.audio_transcriber.download_audio_file(media_url, 'temp/audio.ogg')
-                    transcribed_text = self.audio_transcriber.transcribe_audio(session, 'temp/audio.ogg')
-                    Body += f"\n\nTranscribed Text: {transcribed_text} \n\n"
+            #     if media_content_type.startswith('audio/ogg'):
+            #         self.audio_transcriber.download_audio_file(media_url, 'temp/audio.ogg')
+            #         transcribed_text = self.audio_transcriber.transcribe_audio(session, 'temp/audio.ogg')
+            #         Body += f"\n\nTranscribed Text: {transcribed_text} \n\n"
 
 
             self.session_manager.refresh_session(user.phone_number)
@@ -86,11 +88,11 @@ class WhatsAppBot:
             self.logger.info(f"Session: {session}")
 
             # Empty message, we shoudl check for media
-            if Body is None or Body == "":
+            if prompt is None or prompt == "":
                 return {"success": True}
             
 
-            command = self.command_handler.extract_command(Body)
+            command = self.command_handler.extract_command(prompt)
             if command:
                 self.command_handler.execute_command(command, self, user)
                 return {"success": True}
@@ -98,22 +100,17 @@ class WhatsAppBot:
             
             conv = session.memory_client.get_all(run_id=session.session_id, user_id=user.phone_number)
 
-            prompt = f"{conv}\nUser: {Body}\nAssistant:"
+            prompt = f"{conv}\nUser: {prompt}\nAssistant:"
 
 
             res = await self.openai_handler.query(prompt, session)
 
             session.memory_client.add(prompt+res[0], run_id=session.session_id, user_id=user.phone_number, metadata=['Short Term'])
 
-
-            self.whatsapp_handler.send_message(From, To, res[0])
-
-            return {"success": True}
+            return {"success": True, "response": res[0]}
 
         except Exception as e:
             self.logger.error(f"Error handling message: {e}")
-            if From:
-                self.whatsapp_handler.send_message(From, To, str(e))
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
     
