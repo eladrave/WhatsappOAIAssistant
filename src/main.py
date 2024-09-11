@@ -13,11 +13,11 @@ from .modules.DBClient import DBClient
 from .modules.WhatsAppHandler import WhatsAppHandler
 from .modules.OpenAIHandler import OpenAIHandler
 from .modules.AudioTranscriber import AudioTranscriber
-from .modules.SessionManager import SessionManager
-from .modules.SessionBuilder import SessionBuilder
-from .modules.SessionFactory import SessionFactory
+from .modules.Session import SessionManager
+from .modules.Session import SessionBuilder
+from .modules.Session import SessionFactory
 
-from .modules.ToolManager import ToolManager
+from .modules.Tool import ToolManager
 from .modules.Tool.RetrieveMemory import RetrieveMemory
 from .modules.Tool.SaveMemory import SaveMemory
 from .modules.Tool.WebSearch import WebSearch
@@ -26,6 +26,7 @@ from .modules.Command.CommandHandler import CommandHandler
 from .modules.Command.Command import Command
 from .modules.Command.CommandFactory import CommandFactory
 
+from .modules.WhatsAppBot.BotRequest import BotRequest
 
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -105,7 +106,7 @@ if __name__ == '__main__':
 
     # add bot message handling route to FastAPI
     @app.post("/handleMessage")
-    async def handle_message(request: Request):
+    async def handle_message(request: BotRequest):
         return await bot.handle_message(request)
 
     host = os.getenv('HOST', '0.0.0.0')
