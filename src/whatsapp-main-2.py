@@ -7,9 +7,7 @@ from twilio.rest import Client as TwilioClient
 
 import requests
 
-from .modules.DBClient import DBClient
 from .modules.WhatsAppHandler import WhatsAppHandler
-
 from .modules.WhatsAppHandler.WhatsappRequest import WhatsappRequest
 
 
@@ -24,19 +22,11 @@ load_dotenv()
 
 
 def initialize_whatsapp_handler():
-    db_client = DBClient(
-        os.getenv('DBName'),
-        os.getenv('DBUser'),
-        os.getenv('DBPassword'),
-        os.getenv('DBHost'),
-        os.getenv('DBPort', '5432')
-    )
+    
 
-
-    # Get config from DB
-    config = db_client.read_config()
-    TWILIO_ACCOUNT_SID = config['TwilioAccountSID']
-    TWILIO_AUTH_TOKEN = config['TwilioAuthToken']
+    # Load environment variables
+    TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
+    TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
 
     # Initialize Twilio client
     twilio_client = TwilioClient(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
