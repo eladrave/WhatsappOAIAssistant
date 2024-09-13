@@ -1,6 +1,5 @@
 import os
 from dotenv import load_dotenv
-import openai
 import logging
 import uvicorn
 from fastapi import FastAPI,  Request
