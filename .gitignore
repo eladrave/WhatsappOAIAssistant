@@ -10,5 +10,6 @@ temp/*
 
 cloud_sql_proxy
 
+.github/
 
 __pycache__/
