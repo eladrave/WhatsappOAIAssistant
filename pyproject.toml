@@ -1,0 +1,28 @@
+[project]
+name = "whatsapp-openai-handler"
+version = "0.1.0"
+description = "FastAPI webhook for Twilio WhatsApp to OpenAI"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "httpx",
+    "python-multipart",
+    "twilio",
+    "pydantic>=2",
+    "pydantic-settings",
+    "structlog",
+    "ujson",
+    "emoji",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "pytest-httpx",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"

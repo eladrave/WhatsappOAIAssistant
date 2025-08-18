@@ -1,69 +1,55 @@
-# Assistant Function Schemas
+# WhatsApp OpenAI Handler
 
-This repository contains the function schemas used by the OpenAI assistant in our application. These schemas define how the assistant interacts with long-term and short-term memory, enabling it to save and retrieve important information based on user requests.
+A FastAPI service that receives inbound WhatsApp messages from Twilio and
+forwards them to an OpenAI compatible Chat Completions API. The model response
+is returned to the user via Twilio using TwiML.
 
-## Function Schemas
+## Features
 
-### 1. Save Memory
+* Validates Twilio signatures and allowed senders
+* Filters out emoji reactions
+* Downloads media and transcribes voice notes
+* Forwards text and media to any OpenAI compatible endpoint
+* Responds with TwiML messages
 
-This function is used to save important information to the assistant's long-term memory based on a user request. The information is stored persistently and can be retrieved later, even across different sessions.
+## Running locally
 
-#### Schema
-
-```json
-{
-  "name": "save_memory",
-  "description": "Save important information to long-term memory based on user request.",
-  "strict": false,
-  "parameters": {
-    "type": "object",
-    "properties": {
-      "query": {
-        "type": "string",
-        "description": "The specific information or text to be saved."
-      }
-    },
-    "required": [
-      "query"
-    ]
-  }
-}
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .[dev]
+cp .env.example .env  # edit with your keys
+uvicorn app.main:app --reload
 ```
 
-### 2. Retrieve Memory
+Send a test message:
 
-This function allows the assistant to retrieve relevant information from its long-term memory based on a user's query. It helps the assistant provide contextually accurate responses by accessing previously stored information.
-
-#### Schema
-
-```json
-{
-  "name": "retrieve_memory",
-  "description": "Retrieve relevant information from long-term memory based on a user's query.",
-  "strict": false,
-  "parameters": {
-    "type": "object",
-    "properties": {
-      "query": {
-        "type": "string",
-        "description": "The specific query from the user to search in memory."
-      }
-    },
-    "required": [
-      "query"
-    ]
-  }
-}
+```bash
+python cli.py "Hello" --from-number whatsapp:+15551234567
 ```
 
-## How to Update Function Schemas
+## Docker
 
-To ensure that the assistant functions correctly and remains up-to-date with the latest requirements, follow these steps:
+```bash
+docker build -t whatsapp-openai-handler .
+docker compose up
+```
 
-1. **Edit the JSON Schema**: Update the schema files with the correct parameters and descriptions as needed.
-2. **Commit Changes**: Commit the updated schemas to the repository with a clear commit message.
-3. **Push to GitHub**: Push the changes to the main branch to update the repository.
+## Environment
 
-## Contributing
+Configuration is via environment variables; see `.env.example` for options. An
+optional `CONFIG_FILE` may point at a YAML file for per-sender overrides
+(similar to `config.example.yaml`).
 
-If you need to make updates to the function schemas or have suggestions for improvements, please create a pull request or open an issue on this repository. All contributions are welcome!
+## Testing
+
+```bash
+pytest
+```
+
+## Twilio configuration
+
+1. Configure a WhatsApp sender in Twilio and connect it to a Messaging Service.
+2. Set the inbound webhook URL to `https://your-host/twilio/whatsapp/webhook`.
+3. Set `TWILIO_AUTH_TOKEN` and `ALLOWED_SENDERS` in the environment.
+4. Send a WhatsApp message to test.

@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install .[dev]
+      - name: Lint
+        run: python -m py_compile $(git ls-files '*.py')
+      - name: Test
+        run: pytest
+      - name: Build Docker image
+        run: docker build -t whatsapp-openai-handler .
