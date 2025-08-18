@@ -1,0 +1,5 @@
+senders:
+  "+15551234567":
+    system_prompt: "You are a helpful assistant for Elad."
+    openai_options:
+      temperature: 0.2

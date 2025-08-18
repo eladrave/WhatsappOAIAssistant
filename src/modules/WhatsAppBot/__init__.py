@@ -1,3 +1,0 @@
-
-from .WhatsAppBot import WhatsAppBot
-

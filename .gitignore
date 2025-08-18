@@ -1,12 +1,7 @@
-/ignore
-.env
-
-
-# Ignore everything in the temp directory
-temp/*
-
-# Do not ignore the temp directory itself
-!temp/
-
-cloud_sql_proxy
 __pycache__/
+*.pyc
+.env
+.env.*
+.temp
+*.log
+.DS_Store

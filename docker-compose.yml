@@ -1,0 +1,11 @@
+version: '3.9'
+services:
+  app:
+    build: .
+    environment:
+      - OPENAI_API_KEY=changeme
+      - TWILIO_AUTH_TOKEN=changeme
+      - ALLOWED_SENDERS=+15551234567
+    ports:
+      - "8080:8080"
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8080
